@@ -1,6 +1,6 @@
 ## Interface: 30300
 ## Title: AdvancedWotLkCombatLog |cFFFF8080-Shino-|r
-## Notes: |@Version: 2@|Collects pets and armory information such as gear.
+## Notes: |@Version: 3@|Collects pets and armory information such as gear.
 ## Author: Shino
 ## SavedVariablesPerCharacter: RPLL_PlayerInformation
 

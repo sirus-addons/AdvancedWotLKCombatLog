@@ -34,6 +34,8 @@ local UnitSex = UnitSex
 
 local UNKNOWN = UNKNOWN
 
+local DEBUG = false
+
 local SpellFailedCombatLogEvents = {
 	"SPELL_FAILED_AFFECTING_COMBAT",
 	"SPELL_FAILED_ALREADY_BEING_TAMED",
@@ -366,11 +368,15 @@ RPLL.CHAT_MSG_ADDON = function(prefix, msg, channel, sender)
 		end
 
 		if strfind(prefix, "LOOT") ~= nil then
-			tinsert(RPLL.ExtraMessages, "LOOT: " .. date("%d.%m.%y %H:%M:%S") .. "&" .. msg)
-			RPLL.ExtraMessageLength = RPLL.ExtraMessageLength + 1
+			if DEBUG then
+				tinsert(RPLL.ExtraMessages, "LOOT: " .. date("%d.%m.%y %H:%M:%S") .. "&" .. msg)
+				RPLL.ExtraMessageLength = RPLL.ExtraMessageLength + 1
+			end
 		elseif strfind(prefix, "PET") ~= nil then
-			tinsert(RPLL.ExtraMessages, "PET_SUMMON: " .. date("%d.%m.%y %H:%M:%S") .. "&" .. msg)
-			RPLL.ExtraMessageLength = RPLL.ExtraMessageLength + 1
+			if DEBUG then
+				tinsert(RPLL.ExtraMessages, "PET_SUMMON: " .. date("%d.%m.%y %H:%M:%S") .. "&" .. msg)
+				RPLL.ExtraMessageLength = RPLL.ExtraMessageLength + 1
+			end
 		elseif strfind(prefix, "CBT_I_1") ~= nil then
 			local unit_guid, unit_name, race, hero_class, gender, g_name, g_rank_name, g_rank_index = strsplit("&", msg)
 			local found_unit_id = RPLL.find_unit_id(sender)
@@ -810,7 +816,9 @@ RPLL.CHAT_MSG_LOOT = function(msg)
 	end
 end
 
-RPLL:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+if DEBUG then
+	RPLL:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+end
 RPLL.COMBAT_LOG_EVENT_UNFILTERED = function(ts, evt)
 	if evt == "SPELL_CAST_FAILED" then
 		RPLL:RotateSpellFailedMessages()
@@ -1155,8 +1163,10 @@ function RPLL:CollectUnit(unit)
 end
 
 function RPLL:PushExtraMessage(prefix, msg)
-	tinsert(RPLL.ExtraMessages, prefix .. ": " .. date("%d.%m.%y %H:%M:%S") .. "&" .. msg)
-	RPLL.ExtraMessageLength = RPLL.ExtraMessageLength + 1
+	if DEBUG then
+		tinsert(RPLL.ExtraMessages, prefix .. ": " .. date("%d.%m.%y %H:%M:%S") .. "&" .. msg)
+		RPLL.ExtraMessageLength = RPLL.ExtraMessageLength + 1
+	end
 end
 
 function RPLL:PushCurrentInstanceInfo()
