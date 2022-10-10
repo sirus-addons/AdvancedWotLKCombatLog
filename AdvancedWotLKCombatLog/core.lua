@@ -890,7 +890,7 @@ local inspect_timeout = 3 -- 3 seconds
 local inspect_in_progress = false
 function RPLL:OnUpdate()
 	-- Suppress Addon Error frame
-	if StaticPopup1 and StaticPopup1:IsShown() and strfind(StaticPopup1.text:GetText(), "AdvancedWotLKCombatLog", 1, true) then
+	if StaticPopup1 and StaticPopup1:IsShown() and strfind(StaticPopup1.text:GetText() or "", "AdvancedWotLKCombatLog", 1, true) then
 		StaticPopup1:Hide()
 	end
 
