@@ -55,7 +55,7 @@ local function valueOrNil(val)
 end
 
 local RPLL = CreateFrame("Frame")
-RPLL.VERSION = 34
+RPLL.VERSION = 35
 RPLL.MAX_MESSAGE_LENGTH = 300
 RPLL.MESSAGE_PREFIX = "RPLL_H_"
 RPLL.MESSAGE_PREFIX_LEN = strlen(RPLL.MESSAGE_PREFIX)
@@ -101,6 +101,7 @@ do	-- Register events
 	RPLL:RegisterEvent("CHAT_MSG_LOOT")
 
 	RPLL:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	RPLL:RegisterEvent("INSPECT_TALENT_READY")
 end
 
 local eventToUnit = {
@@ -138,8 +139,7 @@ function RPLL:OnEvent(event, ...)
 	elseif event == "PLAYER_ENTERING_WORLD" then
 		self:UnregisterEvent(event)
 
-		UIErrorsFrame:Hide()
-		UIErrorsFrame.Show = function() end
+		UIErrorsFrame:UnregisterEvent("UI_ERROR_MESSAGE")
 
 		self:SendMessage(strformat("LegacyPlayers collector v%s has been loaded. Type /rpll for help.", self.VERSION))
 
@@ -565,25 +565,16 @@ function RPLL:CollectGear(unit)
 	local pinfo = self:GetPlayerInfo(guid)
 	if not pinfo then return end
 
-	local gear = {}
+	wipe(pinfo["gear"])
+
 	for i = 1, 19 do
 		local itemLink = GetInventoryItemLink(unit, i)
 		if itemLink then
 			local linkData = strmatch(itemLink, "item:([^\124]+)")
 			if linkData then
-				gear[i] = linkData
-			else
-				gear[i] = nil
+				pinfo["gear"][i] = linkData
 			end
-		else
-			gear[i] = nil
 		end
-	end
-
-	if next(gear) then
-		pinfo["gear"] = gear
-	elseif not pinfo["gear"] then
-		pinfo["gear"] = {}
 	end
 
 	if not RPLL:PlayerIsQueued(guid) then
@@ -607,8 +598,7 @@ function RPLL:CollectCurrentTalentsAndArenaTeams()
 
 	local playerGUID = UnitGUID("player")
 
-	-- Talents
-	do
+	do	-- Talents
 		local index = 1
 		local talents = {}
 		for tabIndex = 1, 3 do
@@ -630,9 +620,7 @@ function RPLL:CollectCurrentTalentsAndArenaTeams()
 	end
 
 	do	-- Arena teams
-		if not pinfo["arena_teams"] then
-			pinfo["arena_teams"] = {}
-		end
+		table.wipe(pinfo["arena_teams"])
 
 		for i = 1, 3 do
 			local teamName, teamSize
@@ -644,8 +632,6 @@ function RPLL:CollectCurrentTalentsAndArenaTeams()
 
 			if teamName and teamSize then
 				pinfo["arena_teams"][teamSize] = teamName
-			else
-				pinfo["arena_teams"][teamSize] = nil
 			end
 		end
 	end
